@@ -2,7 +2,6 @@ package burgers.user;
 
 import net.datafaker.Faker;
 import org.apache.commons.lang3.StringUtils;
-
 import java.util.Locale;
 
 public class UserRandom {

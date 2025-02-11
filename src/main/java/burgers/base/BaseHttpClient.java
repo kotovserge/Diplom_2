@@ -1,6 +1,5 @@
 package burgers.base;
 
-import burgers.user.UserChangeResponse;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.filter.log.ErrorLoggingFilter;
 import io.restassured.filter.log.RequestLoggingFilter;

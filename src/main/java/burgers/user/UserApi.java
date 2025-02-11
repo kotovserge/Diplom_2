@@ -4,7 +4,6 @@ import burgers.base.BaseHttpClient;
 import io.qameta.allure.Step;
 import io.restassured.response.Response;
 import io.restassured.response.ValidatableResponse;
-
 import burgers.constants.Url;
 
 public class UserApi extends BaseHttpClient {
@@ -31,7 +30,6 @@ public class UserApi extends BaseHttpClient {
 
     @Step ("Send POST to delete a user")
     public ValidatableResponse delete(String token) {
-        //CourierDataDelete body = new CourierDataDelete( String.valueOf(idCourier));
-        return doDeleteRequest(Url.USER_DELETE_API, token);
+       return doDeleteRequest(Url.USER_DELETE_API, token);
     }
 }
