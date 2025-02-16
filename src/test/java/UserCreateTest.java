@@ -1,16 +1,16 @@
 import burgers.user.UserApi;
 import burgers.user.UserRandom;
 import burgers.user.UserRegisterRequest;
-import io.qameta.allure.Step;
+import io.qameta.allure.Description;
+import io.qameta.allure.junit4.DisplayName;
 import io.restassured.response.ValidatableResponse;
 import org.apache.http.HttpStatus;
+import org.assertj.core.api.SoftAssertions;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-
 import static java.util.Objects.isNull;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
-import static org.junit.Assert.assertEquals;
 
 public class UserCreateTest {
     private UserApi userApi;
@@ -24,22 +24,28 @@ public class UserCreateTest {
         userDataRegister = new UserRandom().generateUser();
     }
 
-    // Создать уникального пользователя
-    @Step("Создать уникального пользователя")
+    @DisplayName("Создать уникального пользователя")
+    @Description("Создаем уникального пользователя")
     @Test
     public void userLoginTest() {
         response = userApi.register(userDataRegister);
         if (isTrue(response.extract().path("success"))) {
             accessToken = response.extract().path("accessToken");
         }
-        assertEquals("Неверный Статус Код при создании пользователя",
-                HttpStatus.SC_OK, response.extract().statusCode());
-        assertEquals("Неверное сообщение при создании пользователя",
-                true, isTrue(response.extract().path("success")));
+        SoftAssertions softAssertions = new SoftAssertions();
+        softAssertions.assertThat(response.extract().statusCode())
+                .as("Неверный Статус код при создании пользователя")
+                .isEqualTo(HttpStatus.SC_OK);
+        softAssertions.assertThat(isTrue(response.extract().path("success")))
+                .as("Неверный статус сообщения при создании пользователя")
+                .isTrue();
+        softAssertions.assertAll();
+
+
     };
 
-    // Создать пользователя, который уже зарегистрирован
-    @Step("Создать пользователя, который уже зарегистрирован ")
+    @DisplayName("Создать пользователя, который уже зарегистрирован")
+    @Description("Создаем пользователя, который уже зарегистрирован")
     @Test
     public void userLoginRepeatTest() {
         //Создаем нового пользователя
@@ -49,12 +55,18 @@ public class UserCreateTest {
         }
         // Создаем пользователя с такими же параметрами
         response = userApi.register(userDataRegister);
-        assertEquals("Неверный Статус Код при создании зарегистрированного пользователя повторно",
-                HttpStatus.SC_FORBIDDEN, response.extract().statusCode());
-        assertEquals("Неверный статус сообщения при создании зарегистрированного пользователя повторно",
-                false, response.extract().path("success"));
-        assertEquals("Неверное сообщения при создании зарегистрированного пользователя повторно",
-                "User already exists", response.extract().path("message"));
+        SoftAssertions softAssertions = new SoftAssertions();
+        softAssertions.assertThat(response.extract().statusCode())
+                .as("Неверный Статус Код при создании зарегистрированного пользователя повторно")
+                .isEqualTo(HttpStatus.SC_FORBIDDEN);
+        softAssertions.assertThat(isTrue(response.extract().path("success")))
+                .as("Неверный статус сообщения при создании зарегистрированного пользователя повторно")
+                .isFalse();
+        softAssertions.assertThat(response.extract().path("message").toString())
+                .as("Неверное сообщения при создании зарегистрированного пользователя повторно")
+                .isEqualTo("User already exists");
+        softAssertions.assertAll();
+
     };
 
     // Удаляем пользователя, если он был создан

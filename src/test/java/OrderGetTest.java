@@ -2,17 +2,18 @@ import burgers.order.OrderApi;
 import burgers.user.UserApi;
 import burgers.user.UserRandom;
 import burgers.user.UserRegisterRequest;
-import io.qameta.allure.Step;
+import io.qameta.allure.Description;
+import io.qameta.allure.junit4.DisplayName;
 import io.restassured.response.Response;
 import io.restassured.response.ValidatableResponse;
 import org.apache.http.HttpStatus;
+import org.assertj.core.api.SoftAssertions;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import static java.util.Objects.isNull;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
-import static org.junit.Assert.assertEquals;
 
 public class OrderGetTest {
     private UserApi userApi = new UserApi();
@@ -33,26 +34,37 @@ public class OrderGetTest {
         }
     }
 
-    @Step("Получить заказы авторизированного пользователя")
+    @DisplayName("Проверка получения заказов авторизированным пользователем")
+    @Description("Получаем заказы авторизированного пользователя")
     @Test
     public void getUserAuthOrderTest() {
         response = orderApi.getUserOrders(accessToken);
-        assertEquals("Неверный Статус Код при получении всех заказов авторизированного пользователя",
-                HttpStatus.SC_OK, response.then().extract().statusCode());
-        assertEquals("Неверный статус ответа при получении всех заказов авторизированного пользователя",
-                true, response.then().extract().path("success"));
+        SoftAssertions softAssertions = new SoftAssertions();
+        softAssertions.assertThat(response.then().extract().statusCode())
+                .as("Неверный Статус Код при получении всех заказов авторизированного пользователя")
+                .isEqualTo(HttpStatus.SC_OK);
+        softAssertions.assertThat(isTrue(response.then().extract().path("success")))
+                .as("Неверный статус ответа при получении всех заказов авторизированного пользователя")
+                .isTrue();
+        softAssertions.assertAll();
     }
 
-    @Step("Получить заказы неавторизированного пользователя")
+    @DisplayName("Проверка получения заказов неавторизированным пользователем")
+    @Description("Получаем заказы неавторизированного пользователя")
     @Test
     public void getUserOrdersTest() {
         response = orderApi.getUserOrders();
-        assertEquals("Неверный Статус Код при получении всех заказов авторизированного пользователя",
-                HttpStatus.SC_UNAUTHORIZED, response.then().extract().statusCode());
-        assertEquals("Неверный статус ответа при получении всех заказов неавторизированного пользователя",
-                false, response.then().extract().path("success"));
-        assertEquals("Неверное сообщение при получении всех заказов неавторизированного пользователя",
-                "You should be authorised", response.then().extract().path("message"));
+        SoftAssertions softAssertions = new SoftAssertions();
+        softAssertions.assertThat(response.then().extract().statusCode())
+                .as("Неверный Статус Код при получении всех заказов неавторизированного пользователя")
+                .isEqualTo(HttpStatus.SC_UNAUTHORIZED);
+        softAssertions.assertThat(isTrue(response.then().extract().path("success")))
+                .as("Неверный статус ответа при получении всех заказов неавторизированного пользователя")
+                .isFalse();
+        softAssertions.assertThat(response.then().extract().path("message").toString())
+                .as("Неверное сообщение ответа при получении всех заказов неавторизированного пользователя")
+                .isEqualTo("You should be authorised");
+        softAssertions.assertAll();
     }
 
     @After

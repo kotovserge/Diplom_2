@@ -4,8 +4,11 @@ import burgers.order.OrderRequest;
 import burgers.user.UserApi;
 import burgers.user.UserRandom;
 import burgers.user.UserRegisterRequest;
-import io.qameta.allure.Step;
+import io.qameta.allure.Description;
+import io.qameta.allure.junit4.DisplayName;
 import io.restassured.response.ValidatableResponse;
+import org.apache.http.HttpStatus;
+import org.assertj.core.api.SoftAssertions;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -25,9 +28,9 @@ public class OrderCreateTest {
     private ValidatableResponse response;
     private String accessToken;
     private String[] hash;
-    private int codeStatus;
-    private Boolean success;
-    private String message;
+    private int codeStatusExpected;
+    private Boolean successExpected;
+    private String messageExpected;
 
     @Before
     public void prepare() {
@@ -40,19 +43,20 @@ public class OrderCreateTest {
         }
     }
 
-    public OrderCreateTest( String[] hash, String[] codeStatus, String[] success, String[] message) {
+    public OrderCreateTest( String[] hash, String[] codeStatusExpected, String[] successExpected, String[] messageExpected) {
         this.hash = hash;
-        this.codeStatus = Integer.parseInt(codeStatus[0]);
-        this.success = Boolean.parseBoolean(success[0]);
-        this.message = message[0];
+        this.codeStatusExpected = Integer.parseInt(codeStatusExpected[0]);
+        this.successExpected = Boolean.parseBoolean(successExpected[0]);
+        this.messageExpected = messageExpected[0];
     }
 
     @Parameterized.Parameters(name = " hash ({0}) , codeSatus ({1}) , success ({2}, message ({3}) )")
     public static Object[][] setParams() {
-        return Ingredient.hash;
+        return Ingredient.HASH;
     }
 
-    @Step("Заказ с авторизацией")
+    @DisplayName("Заказ с авторизацией")
+    @Description("Делаем заказ с авторизации пользователя")
     @Test
     public void createOrderAuth() {
         orderRequest = new OrderRequest(hash);
@@ -60,29 +64,30 @@ public class OrderCreateTest {
         // Запрос с авторизацией
         response = orderApi.createOrder(accessToken, orderRequest);
         assertEquals("Неверный Статус Код при создании заказа",
-                codeStatus, response.extract().statusCode());
+                codeStatusExpected, response.extract().statusCode());
         if (response.extract().statusCode()!=500) {
             assertEquals("Неверный статус success при создании заказа",
-                    success, response.extract().path("success"));
+                    successExpected, response.extract().path("success"));
             assertEquals("Неверное сообщение message при создании заказа",
-                    message, response.extract().path("message"));
+                    messageExpected, response.extract().path("message"));
         }
     }
 
-    @Step("Заказ без авторизацией")
+    @DisplayName("Заказ без авторизацией")
+    @Description("Делаем заказ без авторизацией пользователя")
     @Test
     public void createOrder() {
         orderRequest = new OrderRequest(hash);
         orderApi = new OrderApi();
         // Запрос без авторизации
         response = orderApi.createOrder(orderRequest);
-        assertEquals("Неверный Статус Код при создании заказа",
-                codeStatus, response.extract().statusCode());
+        assertEquals("Неверный Статус Код при создании заказа без авторизацией",
+                codeStatusExpected, response.extract().statusCode());
         if (response.extract().statusCode()!=500) {
-            assertEquals("Невернй статус success при создании заказа",
-                    success, response.extract().path("success"));
-            assertEquals("Неверное сообщение message при создании заказа",
-                    message, response.extract().path("message"));
+            assertEquals("Невернй статус success при создании заказа без авторизацией",
+                    successExpected, response.extract().path("success"));
+            assertEquals("Неверное сообщение message при создании заказа без авторизацией",
+                    messageExpected, response.extract().path("message"));
         }
     }
 

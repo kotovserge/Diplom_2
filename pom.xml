@@ -59,6 +59,12 @@
             <artifactId>datafaker</artifactId>
             <version>1.4.0</version>
         </dependency>
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <version>3.27.3</version>  <!-- или последняя версия -->
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -115,6 +121,20 @@
                 <version>2.10.0</version>
                 <configuration>
                     <reportVersion>2.15.0</reportVersion>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.assertj</groupId>
+                <artifactId>assertj-assertions-generator-maven-plugin</artifactId>
+                <version>2.1.0</version>
+                <configuration>
+                    <packages>
+                        <param>your.first.package</param>
+                        <param>your.second.package</param>
+                    </packages>
+                    <classes>
+                        <param>your.third.package.YourClass</param>
+                    </classes>
                 </configuration>
             </plugin>
         </plugins>

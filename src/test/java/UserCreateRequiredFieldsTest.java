@@ -1,9 +1,11 @@
 import burgers.user.UserApi;
 import burgers.user.UserRandom;
 import burgers.user.UserRegisterRequest;
-import io.qameta.allure.Step;
+import io.qameta.allure.Description;
+import io.qameta.allure.junit4.DisplayName;
 import io.restassured.response.ValidatableResponse;
 import org.apache.http.HttpStatus;
+import org.assertj.core.api.SoftAssertions;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -12,7 +14,6 @@ import org.junit.runners.Parameterized;
 
 import static java.util.Objects.isNull;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
-import static org.junit.Assert.assertEquals;
 
 @RunWith(Parameterized.class)
 public class UserCreateRequiredFieldsTest {
@@ -49,8 +50,8 @@ public class UserCreateRequiredFieldsTest {
         };
     }
 
-    // Создать пользователя с не заполненым полем email
-    @Step("Создать пользователя")
+    @DisplayName("Создать пользователя")
+    @Description("Создаем пользователя")
     @Test
     public void userLoginTest() {
         userDataRegister = new UserRegisterRequest(email, password, name);
@@ -58,12 +59,17 @@ public class UserCreateRequiredFieldsTest {
         if (isTrue(response.extract().path("success"))) {
             accessToken = response.extract().path("accessToken");
         }
-        assertEquals("Неверный Статус Код при создании пользователя без обязательных полей",
-                HttpStatus.SC_FORBIDDEN, response.extract().statusCode());
-        assertEquals("Неверный статус сообщения при создании пользователя без обязательных полей",
-                false, response.extract().path("success"));
-        assertEquals("Неверное сообщения при создании пользователя без обязательных полей",
-                "Email, password and name are required fields", response.extract().path("message"));
+        SoftAssertions softAssertions = new SoftAssertions();
+        softAssertions.assertThat(response.extract().statusCode())
+                .as("Неверный Статус Код при создании пользователя без обязательных полей")
+                .isEqualTo(HttpStatus.SC_FORBIDDEN);
+        softAssertions.assertThat(isTrue(response.extract().path("success")))
+                .as("Неверный статус сообщения при создании пользователя без обязательных полей")
+                .isFalse();
+        softAssertions.assertThat(response.extract().path("message").toString())
+                .as("Неверное сообщение при создании пользователя без обязательных полей")
+                .isEqualTo("Email, password and name are required fields");
+        softAssertions.assertAll();
 
     };
 
